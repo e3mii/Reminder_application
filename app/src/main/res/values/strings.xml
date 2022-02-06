@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">HomeWork</string>
+    <string name="account">Account</string>
+    <string name="logout">Logout</string>
+    <string name="edit">Edit</string>
+    <string name="reminder_icon">ReminderIcon</string>
 </resources>

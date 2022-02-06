@@ -1,4 +1,4 @@
-package com.eradotov22.homework
+package com.eradotov.homework
 
 import org.junit.Test
 

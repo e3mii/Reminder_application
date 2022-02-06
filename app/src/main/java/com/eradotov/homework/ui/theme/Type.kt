@@ -1,4 +1,4 @@
-package com.eradotov22.homework.ui.theme
+package com.eradotov.homework.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

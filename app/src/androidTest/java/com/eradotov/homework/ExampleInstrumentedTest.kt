@@ -1,4 +1,4 @@
-package com.eradotov22.homework
+package com.eradotov.homework
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
