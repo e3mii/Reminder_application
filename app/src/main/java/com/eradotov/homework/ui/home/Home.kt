@@ -108,6 +108,7 @@ private fun HomeAppBar(
             }
             /*TODO: 1) fix logout for back press
             *       2) display alert box logout/cancel*/
+            /*TODO: 1) potential fix navigation.clearStack or something similar (need to try)*/
             IconButton(
                 onClick = {
                     navController.navigate("login")

@@ -7,6 +7,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,6 +23,21 @@ fun Profile(
     onBackPress: () -> Unit
 ) {
     val context = LocalContext.current
+    val textEditEnable = rememberSaveable{ mutableStateOf(false ) }
+    val appTopBarButtonDisable = rememberSaveable{ mutableStateOf( true ) }
+    val saveButtonShow = rememberSaveable{ mutableStateOf( false ) }
+    val profileUsername = rememberSaveable {
+        mutableStateOf("")
+    }
+    val profileEmail = rememberSaveable {
+        mutableStateOf("")
+    }
+    val profileMobile = rememberSaveable {
+        mutableStateOf("")
+    }
+    val profileAddress = rememberSaveable {
+        mutableStateOf("")
+    }
 
     Surface {
         Column(
@@ -32,13 +49,21 @@ fun Profile(
                 backgroundColor = MaterialTheme.colors.secondary.copy(alpha = 0.87f),
             ) {
                 IconButton(
-                    onClick = onBackPress
+                    onClick = onBackPress,
+                    enabled = appTopBarButtonDisable.value
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        tint = MaterialTheme.colors.primary
-                    )
+                    if(!appTopBarButtonDisable.value){
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
                 }
                 Text(
                     text = "Profile",
@@ -52,13 +77,25 @@ fun Profile(
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconButton(
-                        onClick = { Toast.makeText(context, "Under construction...will enable change", Toast.LENGTH_SHORT).show() }
+                        onClick = {
+                            textEditEnable.value = true
+                            appTopBarButtonDisable.value = false
+                            saveButtonShow.value = true
+                        },
+                        enabled = appTopBarButtonDisable.value
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.edit),
-                            tint = MaterialTheme.colors.primary
-                        )
+                        if(!appTopBarButtonDisable.value){
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.edit)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.edit),
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
                     }
                 }
             }
@@ -83,9 +120,10 @@ fun Profile(
                 Spacer(modifier = Modifier.height(20.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "eradotov22",
-                    enabled = false,
-                    onValueChange = {},
+                    value = profileUsername.value,
+                    placeholder = { Text(text = "eradotov22")},
+                    enabled = textEditEnable.value,
+                    onValueChange = { data -> profileUsername.value = data },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -101,9 +139,10 @@ fun Profile(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "eradotov22@student.oulu.fi",
-                    enabled = false,
-                    onValueChange = {},
+                    value = profileEmail.value,
+                    placeholder = { Text(text = "eradotov22@student.oulu.fi")},
+                    enabled = textEditEnable.value,
+                    onValueChange = { data -> profileEmail.value = data },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -119,11 +158,12 @@ fun Profile(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "+358991231234",
-                    enabled = false,
-                    onValueChange = {},
+                    value = profileMobile.value,
+                    placeholder = { Text(text = "+385991231234")},
+                    enabled = textEditEnable.value,
+                    onValueChange = { data -> profileMobile.value = data },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.Phone
                     ),
                     textStyle = MaterialTheme.typography.body1,
                     trailingIcon = {
@@ -137,9 +177,10 @@ fun Profile(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "Oulu, address...",
-                    enabled = false,
-                    onValueChange = {},
+                    value = profileAddress.value,
+                    placeholder = { Text(text = "Oulu, address...")},
+                    enabled = textEditEnable.value,
+                    onValueChange = { data -> profileAddress.value = data },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -152,6 +193,24 @@ fun Profile(
                         )
                     }
                 )
+                Spacer(modifier = Modifier.height(20.dp))
+                if(saveButtonShow.value){
+                    Button(
+                        onClick = {
+                            textEditEnable.value = false
+                            appTopBarButtonDisable.value = true
+                            saveButtonShow.value = false
+                            Toast.makeText(context, "Under construction...will update new data to database", Toast.LENGTH_SHORT).show()
+                        },
+                        enabled = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(45.dp),
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text(text = "Save changes")
+                    }
+                }
             }
         }
     }
