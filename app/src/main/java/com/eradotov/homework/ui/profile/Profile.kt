@@ -1,6 +1,7 @@
 package com.eradotov.homework.ui.profile
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -26,6 +27,12 @@ fun Profile(
     val textEditEnable = rememberSaveable{ mutableStateOf(false ) }
     val appTopBarButtonDisable = rememberSaveable{ mutableStateOf( true ) }
     val saveButtonShow = rememberSaveable{ mutableStateOf( false ) }
+    val profileFirstname = rememberSaveable {
+        mutableStateOf("")
+    }
+    val profileLastname = rememberSaveable {
+        mutableStateOf("")
+    }
     val profileUsername = rememberSaveable {
         mutableStateOf("")
     }
@@ -106,18 +113,61 @@ fun Profile(
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(150.dp),
-                    tint = MaterialTheme.colors.primary
-                )
+                AnimatedVisibility(textEditEnable.value == false){
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(150.dp),
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Emanuel Radotovic",
-                    style = MaterialTheme.typography.h5
-                )
-                Spacer(modifier = Modifier.height(20.dp))
+                if(textEditEnable.value == true){
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = profileFirstname.value,
+                        placeholder = { Text(text = "Emanuel")},
+                        enabled = textEditEnable.value,
+                        onValueChange = { data -> profileUsername.value = data },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text
+                        ),
+                        textStyle = MaterialTheme.typography.body1,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = profileLastname.value,
+                        placeholder = { Text(text = "Radotovic")},
+                        enabled = textEditEnable.value,
+                        onValueChange = { data -> profileUsername.value = data },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text
+                        ),
+                        textStyle = MaterialTheme.typography.body1,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                } else {
+                    Text(
+                        text = "Emanuel Radotovic",
+                        style = MaterialTheme.typography.h5
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = profileUsername.value,
@@ -194,7 +244,7 @@ fun Profile(
                     }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                if(saveButtonShow.value){
+                AnimatedVisibility(saveButtonShow.value){
                     Button(
                         onClick = {
                             textEditEnable.value = false
