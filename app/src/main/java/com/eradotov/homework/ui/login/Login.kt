@@ -1,13 +1,13 @@
 package com.eradotov.homework.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,27 +16,33 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.eradotov.homework.Graph
+import com.eradotov.homework.data.repository.UserRepository
+import com.eradotov.homework.ui.home.userReminders.UserRemindersViewModel
+import com.eradotov.homework.util.viewModelProviderFactoryOf
 import com.google.accompanist.insets.systemBarsPadding
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun Login(
     navController: NavController,
 ){
-    val loginViewModel: LoginViewModel = LoginViewModel()
+    val coroutineScope = rememberCoroutineScope()
+    val userRepository: UserRepository = Graph.userRepository
+    val username = rememberSaveable {
+        mutableStateOf("")
+    }
+    val password = rememberSaveable {
+        mutableStateOf("")
+    }
     val context = LocalContext.current
 
     Surface(
         modifier = Modifier.fillMaxSize()
     ){
-        val username = rememberSaveable {
-            mutableStateOf("")
-        }
-        val password = rememberSaveable {
-            mutableStateOf("")
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,9 +99,13 @@ fun Login(
             Spacer(modifier = Modifier.height(20.dp))
             Button(
                 onClick = {
-                    if(loginViewModel.validateLogin(username = username.value, password = password.value, context = context)){
-                        navController.navigate("home")
-                    }
+                   coroutineScope.launch {
+                       if(userRepository.validateLogin(username.value,password.value)!=null){
+                           navController.navigate("home/${username.value}")
+                       } else {
+                           Toast.makeText(context,"Wrong credentials...", Toast.LENGTH_SHORT).show()
+                       }
+                   }
                           },
                 enabled = true,
                 modifier = Modifier

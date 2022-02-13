@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.eradotov.homework.R
 import com.google.accompanist.insets.systemBarsPadding
 
+/*TODO-FILL WITH REAL USER DATA*/
 @Composable
 fun Profile(
     onBackPress: () -> Unit
@@ -27,24 +28,12 @@ fun Profile(
     val textEditEnable = rememberSaveable{ mutableStateOf(false ) }
     val appTopBarButtonDisable = rememberSaveable{ mutableStateOf( true ) }
     val saveButtonShow = rememberSaveable{ mutableStateOf( false ) }
-    val profileFirstname = rememberSaveable {
-        mutableStateOf("")
-    }
-    val profileLastname = rememberSaveable {
-        mutableStateOf("")
-    }
-    val profileUsername = rememberSaveable {
-        mutableStateOf("")
-    }
-    val profileEmail = rememberSaveable {
-        mutableStateOf("")
-    }
-    val profileMobile = rememberSaveable {
-        mutableStateOf("")
-    }
-    val profileAddress = rememberSaveable {
-        mutableStateOf("")
-    }
+    val profileFirstname = rememberSaveable { mutableStateOf("") }
+    val profileLastname = rememberSaveable { mutableStateOf("") }
+    val profileUsername = rememberSaveable { mutableStateOf("") }
+    val profileEmail = rememberSaveable { mutableStateOf("") }
+    val profileMobile = rememberSaveable { mutableStateOf("") }
+    val profileAddress = rememberSaveable { mutableStateOf("") }
 
     Surface {
         Column(
@@ -113,7 +102,7 @@ fun Profile(
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                AnimatedVisibility(textEditEnable.value == false){
+                AnimatedVisibility(!textEditEnable.value){
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = null,
@@ -122,7 +111,7 @@ fun Profile(
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                if(textEditEnable.value == true){
+                if(textEditEnable.value){
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         value = profileFirstname.value,

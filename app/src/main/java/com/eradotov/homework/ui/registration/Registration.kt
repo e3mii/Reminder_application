@@ -7,6 +7,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,12 +19,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.eradotov.homework.R
 import com.google.accompanist.insets.systemBarsPadding
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eradotov.homework.data.entity.User
+import kotlinx.coroutines.launch
 
 @Composable
 fun Registration(
-    onBackPress: () -> Unit
+    onBackPress: () -> Unit,
+    viewModel: RegistrationViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val Firstname = rememberSaveable { mutableStateOf("") }
+    val Lastname = rememberSaveable { mutableStateOf("") }
+    val Username = rememberSaveable { mutableStateOf("") }
+    val Password = rememberSaveable { mutableStateOf("") }
+    val PasswordConfirm = rememberSaveable { mutableStateOf("") }
+    val Email = rememberSaveable { mutableStateOf("") }
+    val Mobile = rememberSaveable { mutableStateOf("") }
+    val Address = rememberSaveable { mutableStateOf("") }
 
     Surface {
         Column(
@@ -68,10 +84,10 @@ fun Registration(
             ) {
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Firstname.value,
+                    enabled = true,
                     label = { Text(text = "First name")},
-                    onValueChange = {},
+                    onValueChange = {data -> Firstname.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -87,10 +103,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Lastname.value,
+                    enabled = true,
                     label = { Text(text = "Last name")},
-                    onValueChange = {},
+                    onValueChange = {data -> Lastname.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -106,10 +122,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Username.value,
+                    enabled = true,
                     label = { Text(text = "Username")},
-                    onValueChange = {},
+                    onValueChange = {data -> Username.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -125,10 +141,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Password.value,
+                    enabled = true,
                     label = { Text(text = "Password")},
-                    onValueChange = {},
+                    onValueChange = {data -> Password.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password
                     ),
@@ -145,10 +161,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = PasswordConfirm.value,
+                    enabled = true,
                     label = { Text(text = "Password confirmation")},
-                    onValueChange = {},
+                    onValueChange = {data -> PasswordConfirm.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password
                     ),
@@ -165,10 +181,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Email.value,
+                    enabled = true,
                     label = { Text(text = "Email")},
-                    onValueChange = {},
+                    onValueChange = {data -> Email.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -184,10 +200,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Mobile.value,
+                    enabled = true,
                     label = { Text(text = "Phone number")},
-                    onValueChange = {},
+                    onValueChange = {data -> Mobile.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     ),
@@ -203,10 +219,10 @@ fun Registration(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = "under construction...",
-                    enabled = false,
+                    value = Address.value,
+                    enabled = true,
                     label = { Text(text = "Adrress")},
-                    onValueChange = {},
+                    onValueChange = {data -> Address.value = data},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
                     ),
@@ -221,7 +237,21 @@ fun Registration(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
-                    onClick = { Toast.makeText(context, "Under construction...will enable registration", Toast.LENGTH_SHORT).show() },
+                    onClick = {
+                        val user = User(
+                            firstName = Firstname.value,
+                            lastName = Lastname.value,
+                            username = Username.value,
+                            password = Password.value,
+                            mail = Email.value,
+                            phoneNumber = Mobile.value,
+                            address = Address.value
+                        )
+                        coroutineScope.launch {
+                            viewModel.saveRegistration(user)
+                            onBackPress()
+                        }
+                    },
                     enabled = true,
                     modifier = Modifier
                         .fillMaxWidth()

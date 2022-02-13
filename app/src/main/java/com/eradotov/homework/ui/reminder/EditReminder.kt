@@ -1,15 +1,12 @@
 package com.eradotov.homework.ui.reminder
 
-
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.content.Context
-import android.content.res.Resources
 import android.widget.DatePicker
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,28 +15,33 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import com.eradotov.homework.Graph
-import com.eradotov.homework.data.repository.ReminderRepository
 import com.eradotov.homework.data.entity.Reminder
+import com.eradotov.homework.data.repository.ReminderRepository
 import com.google.accompanist.insets.systemBarsPadding
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.material.datepicker.MaterialDatePicker
-import java.sql.Date
 import java.util.*
 
-/*TODO-ADD ICON PICKER OR PHOTO TAKER*/
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun Reminder(
-    userId: Long,
+fun EditReminder(
+    reminderId: Long,
     onBackPress: () -> Unit,
-
-){
+) {
     var context = LocalContext.current
+
+    /*TODO-SWITCH TO VIEW*/
+    val reminderRepository: ReminderRepository = Graph.reminderRepository
+    val coroutineScope = rememberCoroutineScope()
+    var selectedReminder: Reminder? = null
+
+    GlobalScope.launch {
+        selectedReminder = reminderRepository.findReminder(reminderId)
+    }
+
 
     /*TODO-EXCLUDE TO OWN CLASS/FUN*/
     //CALENDAR
@@ -53,14 +55,15 @@ fun Reminder(
     day = calendar.get(Calendar.DAY_OF_MONTH)
     calendar.time = Date()
 
-    val date = remember { mutableStateOf("")}
+    val date = remember { mutableStateOf("") }
     val datePickerDialog = DatePickerDialog(
         context,
-        {_: DatePicker, year: Int, month: Int, dayOfMonth: Int->
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int->
             date.value = "$dayOfMonth.$month.$year"
         }, year, month, day
     )
 
+    date.value = selectedReminder?.rTime.toString()
     val rMessage = rememberSaveable { mutableStateOf("") }
     val rLocationX = rememberSaveable { mutableStateOf("") }
     val rLocationY = rememberSaveable { mutableStateOf("") }
@@ -68,9 +71,8 @@ fun Reminder(
     val rCreationTime = rememberSaveable { mutableStateOf("") }
     val reminderSeen = rememberSaveable { mutableStateOf("") }
 
-    /*TODO-SWITCH TO VIEW*/
-    val reminderRepository: ReminderRepository = Graph.reminderRepository
-    val coroutineScope = rememberCoroutineScope()
+    rMessage.value = selectedReminder?.rMessage.toString()
+    rTime.value = selectedReminder?.rTime.toString()
 
     Surface{
         Column(
@@ -91,7 +93,7 @@ fun Reminder(
                     )
                 }
                 Text(
-                    text = "Add reminder",
+                    text = "Edit reminder",
                     color = MaterialTheme.colors.primary,
                     style = MaterialTheme.typography.h6
                 )
@@ -104,9 +106,9 @@ fun Reminder(
                 OutlinedTextField(
                     value = rMessage.value,
                     enabled = true,
-                    maxLines = 4,
+                    maxLines = 8,
                     onValueChange = {data->rMessage.value=data},
-                    label = { Text(text = "Reminder message")},
+                    label = { Text(text = "Reminder message") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -114,7 +116,7 @@ fun Reminder(
                     value = "Location of reminder...",
                     enabled = false,
                     onValueChange = {},
-                    label = { Text(text = "Description")},
+                    label = { Text(text = "Description") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -124,19 +126,20 @@ fun Reminder(
                         .fillMaxWidth()
                         .size(45.dp)
                 ) {
-                    Text(text = "Pick date:${date.value}")
+                    Text(text = "Change date:${date.value}")
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
                         val reminder = Reminder(
-                            rUserId = userId,
+                            rId = selectedReminder!!.rId,
+                            rUserId = selectedReminder?.rUserId!!.toLong(),
                             rMessage = rMessage.value,
                             rTime = date.value,
                             rCreationTime = Date().time
                         )
-                        coroutineScope.launch {
-                            reminderRepository.addReminder(reminder)
+                        GlobalScope.launch {
+                            reminderRepository.updateReminder(reminder)
                         }
                         onBackPress()
                     },
@@ -144,7 +147,7 @@ fun Reminder(
                         .fillMaxWidth()
                         .size(45.dp)
                 ) {
-                    Text("Add")
+                    Text("Change")
                 }
             }
         }
