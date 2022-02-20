@@ -29,7 +29,6 @@ class NotificationWorker(
             reminderRepository.updateOldReminders(activeUserId, currentDate)
             reminderRepository.updateOccurredReminders(activeUserId, currentDate)
             occurredReminders = reminderRepository.getOccurredRemindersCount(activeUserId)
-            //Toast.makeText(Graph.appContext, "$occurredReminders", Toast.LENGTH_SHORT).show()
             val outputData = workDataOf("NUM_OF_OCCURRED_REMINDERS" to occurredReminders)
             Result.success(outputData)
         } catch (throwable: Throwable){

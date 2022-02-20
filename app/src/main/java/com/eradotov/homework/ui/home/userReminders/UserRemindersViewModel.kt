@@ -32,13 +32,15 @@ class UserRemindersViewModel(
     val state: StateFlow<UserRemindersViewState>
         get() = _state
 
+    private val placeOfUse = "MainUse"
+
     init{
         /*
          * firstly are displayed the occurred reminders (that are happening on that day)
          */
         viewModelScope.launch {
             val activeUser: User = userRepository.getUser(activeUserUsername)
-            setOneTimeNotification(activeUser.userId)
+            setOneTimeNotification(activeUser.userId, placeOfUse)
             val sdf = SimpleDateFormat("dd-MM-yyyy")
             val currentDateInDate = sdf.format(Date())
             val currentDate = fromStringDateToLong(currentDateInDate)
@@ -75,7 +77,7 @@ class UserRemindersViewModel(
 }
 
 //NOTIFICATION & WORK MANAGER PART
-private fun setOneTimeNotification(activeUserId: Long){
+fun setOneTimeNotification(activeUserId: Long, placeOfUse: String){
     val workManager = WorkManager.getInstance(Graph.appContext)
     val constraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -95,9 +97,9 @@ private fun setOneTimeNotification(activeUserId: Long){
         .observeForever{ workInfo ->
             val numberOfOccurredReminder = workInfo.outputData.getInt("NUM_OF_OCCURRED_REMINDERS", 0)
             if(workInfo.state == WorkInfo.State.SUCCEEDED){
-                if(numberOfOccurredReminder == 0){
+                if(numberOfOccurredReminder == 0 && placeOfUse == "MainUse"){
                     freeReminderNotification()
-                } else {
+                } else if(placeOfUse == "MainUse" || placeOfUse == "AddUse" && numberOfOccurredReminder != 0) {
                     occurredReminderNotification(numberOfOccurredReminder)
                 }
             }

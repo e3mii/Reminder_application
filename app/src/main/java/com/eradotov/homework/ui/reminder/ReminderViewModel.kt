@@ -11,14 +11,18 @@ import com.eradotov.homework.R
 import com.eradotov.homework.data.entity.Reminder
 import com.eradotov.homework.data.repository.ReminderRepository
 import com.eradotov.homework.ui.MainActivity
+import com.eradotov.homework.ui.home.userReminders.setOneTimeNotification
 import com.eradotov.homework.ui.home.userReminders.toDateString
 
 class ReminderViewModel(
     private val reminderRepository: ReminderRepository = Graph.reminderRepository
 ) : ViewModel(){
 
+    private val placeOfUse = "AddUse"
+
     suspend fun saveReminder(reminder: Reminder): Long{
         createReminderNotification(reminder)
+        setOneTimeNotification(reminder.rUserId, placeOfUse)
         return reminderRepository.addReminder(reminder)
     }
 

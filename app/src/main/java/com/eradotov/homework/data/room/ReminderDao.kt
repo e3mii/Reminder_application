@@ -10,6 +10,7 @@ abstract class ReminderDao {
     @Query("""
         UPDATE reminders SET reminderSeen = 0
         WHERE user_id = :rUserId AND rTime < :currentDate
+        OR rTime > :currentDate
     """)
     abstract fun updateOldReminders(rUserId: Long, currentDate: Long)
 
