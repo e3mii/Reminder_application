@@ -1,51 +1,38 @@
 package com.eradotov.homework.ui.home
 
 import android.annotation.SuppressLint
-import android.widget.Toast
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.insets.systemBarsPadding
 import com.eradotov.homework.R
-import com.eradotov.homework.data.entity.Reminder
 import com.eradotov.homework.data.entity.User
 import com.eradotov.homework.ui.home.userReminders.UserReminders
+import com.eradotov.homework.ui.home.userReminders.UserRemindersViewModel
 import com.eradotov.homework.util.viewModelProviderFactoryOf
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun Home(
     activeUserUsername: String,
-    viewModel: HomeViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel(),
     navController: NavController
 ){
-    val context = LocalContext.current
-
     Surface(modifier = Modifier.fillMaxSize()) {
         HomeContent(
             activeUser = activeUserUsername,
             navController = navController,
-            viewModel = viewModel
+            homeViewModel = homeViewModel,
         )
     }
 
@@ -56,25 +43,73 @@ fun Home(
 fun HomeContent(
     activeUser: String,
     navController: NavController,
-    viewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
 ) {
+    /*
+     * for the access to the displayData method
+     */
+    val remindersViewModel: UserRemindersViewModel = viewModel(
+        key = "user_reminder_${activeUser}",
+        factory = viewModelProviderFactoryOf { UserRemindersViewModel(activeUser) }
+    )
+    val remindersViewState by remindersViewModel.state.collectAsState()
+
+    /*
+     * for regulating state of button and displayed reminders from one place, that is from
+     * homeViewModel
+     */
+    val reminderOccurrencesState by homeViewModel.state.collectAsState()
+    val onlyOccurred = rememberSaveable{ mutableStateOf( true ) }
     val coroutineScope = rememberCoroutineScope()
     var user: User? = null
     coroutineScope.launch {
-        user = viewModel.userRepository.getUser(activeUser)
+        user = homeViewModel.userRepository.getUser(activeUser)
     }
+
     Scaffold(
         modifier = Modifier.padding(bottom = 20.dp),
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(route = "reminder/${user?.userId}") },
-                contentColor = MaterialTheme.colors.primary,
-                modifier = Modifier.padding(all = 20.dp)
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null
-                )
+                FloatingActionButton(
+                    onClick = {
+                        onlyOccurred.value = !onlyOccurred.value
+                        reminderOccurrencesState.occurState = onlyOccurred.value
+                        coroutineScope.launch {
+                            remindersViewModel.displayData(reminderOccurrencesState.occurState)
+                        }
+                              },
+                    contentColor = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, end = 20.dp)
+                ) {
+                    onlyOccurred.value = reminderOccurrencesState.occurState
+                    if(onlyOccurred.value){
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.VisibilityOff,
+                            contentDescription = null
+                        )
+                    }
+                }
+                FloatingActionButton(
+                    onClick = {
+                        reminderOccurrencesState.occurState = true
+                        navController.navigate(route = "reminder/${user?.userId}")
+                              },
+                    contentColor = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(all = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
             }
         }
     ) {
@@ -94,6 +129,7 @@ fun HomeContent(
                 modifier = Modifier.fillMaxSize(),
                 activeUserUsername = activeUser,
                 navController = navController,
+                homeViewModel = homeViewModel,
             )
         }
     }

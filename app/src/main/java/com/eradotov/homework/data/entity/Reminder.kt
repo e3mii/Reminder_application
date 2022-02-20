@@ -29,7 +29,8 @@ data class Reminder(
     @ColumnInfo(name = "rMessage") val rMessage: String,
     @ColumnInfo(name = "rLocataionX") val rLocataionX: Double? = null,
     @ColumnInfo(name = "rLocataionY") val rLocataionY: Double? = null,
-    @ColumnInfo(name = "rTime") val rTime: String,
+    @ColumnInfo(name = "rTime") val rTime: Long,
     @ColumnInfo(name = "rCreationTime") val rCreationTime: Long,
-    @ColumnInfo(name = "reminderSeen") val rSeen: Boolean? = null,
+    @ColumnInfo(name = "reminderSeen") val rSeen: Boolean?,
+    @ColumnInfo(name = "toNotify") val toNotify: Boolean
 )

@@ -1,65 +1,47 @@
 package com.eradotov.homework.ui.reminder
 
 
-import android.app.DatePickerDialog
-import android.content.Context
-import android.content.res.Resources
-import android.widget.DatePicker
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eradotov.homework.Graph
 import com.eradotov.homework.data.repository.ReminderRepository
 import com.eradotov.homework.data.entity.Reminder
 import com.google.accompanist.insets.systemBarsPadding
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.material.datepicker.MaterialDatePicker
-import java.sql.Date
+import com.eradotov.homework.util.viewModelProviderFactoryOf
+import kotlinx.coroutines.GlobalScope
+import java.text.SimpleDateFormat
 import java.util.*
 
-/*TODO-ADD ICON PICKER OR PHOTO TAKER*/
+/*TODO-ADD ICON PICKER OR PHOTO TAKER
+*     -OR THE IMPORTANCE CHOOSER - connected with colors red/yellow/green
+*     -ADD EMPTY REMINDER RESTRICTION HANDLER*/
 @Composable
 fun Reminder(
     userId: Long,
     onBackPress: () -> Unit,
-
+    reminderViewModel: ReminderViewModel = viewModel()
 ){
     var context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    /*TODO-EXCLUDE TO OWN CLASS/FUN*/
-    //CALENDAR
-    val year: Int
-    val month: Int
-    val day: Int
-
-    val calendar = Calendar.getInstance()
-    year = calendar.get(Calendar.YEAR)
-    month = calendar.get(Calendar.MONTH)
-    day = calendar.get(Calendar.DAY_OF_MONTH)
-    calendar.time = Date()
-
-    val date = remember { mutableStateOf("")}
-    val datePickerDialog = DatePickerDialog(
-        context,
-        {_: DatePicker, year: Int, month: Int, dayOfMonth: Int->
-            date.value = "$dayOfMonth.$month.$year"
-        }, year, month, day
+    /*
+     * viewModel for gadgets - calendar
+     */
+    val gadgetsViewModel: Gadgets = viewModel(
+        key = "reminder_context_$context",
+        factory = viewModelProviderFactoryOf { Gadgets(context) }
     )
+    val gadgetsViewState by gadgetsViewModel.state.collectAsState()
 
     val rMessage = rememberSaveable { mutableStateOf("") }
     val rLocationX = rememberSaveable { mutableStateOf("") }
@@ -67,10 +49,7 @@ fun Reminder(
     val rTime = rememberSaveable { mutableStateOf("") }
     val rCreationTime = rememberSaveable { mutableStateOf("") }
     val reminderSeen = rememberSaveable { mutableStateOf("") }
-
-    /*TODO-SWITCH TO VIEW*/
-    val reminderRepository: ReminderRepository = Graph.reminderRepository
-    val coroutineScope = rememberCoroutineScope()
+    val checkedState = rememberSaveable { mutableStateOf(true) }
 
     Surface{
         Column(
@@ -119,24 +98,38 @@ fun Reminder(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedButton(
-                    onClick = { datePickerDialog.show()},
+                    onClick = {
+                        gadgetsViewModel.DisplayCalendar()
+                              },
                     modifier = Modifier
                         .fillMaxWidth()
                         .size(45.dp)
                 ) {
-                    Text(text = "Pick date:${date.value}")
+                    Text(text = "Pick date:${gadgetsViewState.date}")
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+                Row {
+                    Text(text = "Reminder notification")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Switch(
+                        checked = checkedState.value,
+                        onCheckedChange = { checkedState.value = it },
+                        colors = SwitchDefaults.colors(MaterialTheme.colors.primary)
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
                         val reminder = Reminder(
                             rUserId = userId,
                             rMessage = rMessage.value,
-                            rTime = date.value,
-                            rCreationTime = Date().time
+                            rTime = fromStringDateToLong(gadgetsViewState.date),
+                            rCreationTime = Date().time,
+                            rSeen = false,
+                            toNotify = checkedState.value
                         )
                         coroutineScope.launch {
-                            reminderRepository.addReminder(reminder)
+                            reminderViewModel.saveReminder(reminder)
                         }
                         onBackPress()
                     },
@@ -149,4 +142,14 @@ fun Reminder(
             }
         }
     }
+}
+
+/*
+ * method for transforming string date to long with 00:00:00 time
+ * used for db comparison which reminder is due
+ */
+fun fromStringDateToLong(stringDate: String): Long {
+    val formatter = SimpleDateFormat("dd-MM-yyyy")
+    val date = formatter.parse(stringDate)
+    return date.time
 }

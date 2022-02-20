@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.eradotov.homework"
-        minSdk 23
+        minSdk 26
         targetSdk 31
         versionCode 1
         versionName "1.0"
@@ -63,6 +63,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Accompanist
     implementation "com.google.accompanist:accompanist-insets:0.21.0-beta"
@@ -85,4 +86,7 @@ dependencies {
     // Room
     implementation "androidx.room:room-ktx:2.4.1"
     kapt "androidx.room:room-compiler:2.4.1"
+
+    //Work Manager
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
 }

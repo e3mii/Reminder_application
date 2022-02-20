@@ -1,6 +1,5 @@
 package com.eradotov.homework.ui.registration
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*

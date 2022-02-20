@@ -1,5 +1,6 @@
 package com.eradotov.homework.ui.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,6 +40,12 @@ fun Login(
         mutableStateOf("")
     }
     val context = LocalContext.current
+
+    val loginViewModel: LoginViewModel = viewModel(
+        key = "login_username_${username.value}",
+        factory = viewModelProviderFactoryOf { LoginViewModel(username.value) }
+    )
+    val loginViewState by loginViewModel.state.collectAsState()
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -101,6 +108,7 @@ fun Login(
                 onClick = {
                    coroutineScope.launch {
                        if(userRepository.validateLogin(username.value,password.value)!=null){
+                           loginViewState.activeUserUsername = username.value
                            navController.navigate("home/${username.value}")
                        } else {
                            Toast.makeText(context,"Wrong credentials...", Toast.LENGTH_SHORT).show()
@@ -136,7 +144,7 @@ fun Login(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "v1.0"
+                text = "v2.0"
             )
         }
     }

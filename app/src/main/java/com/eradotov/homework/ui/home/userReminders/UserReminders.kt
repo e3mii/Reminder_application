@@ -1,16 +1,20 @@
 package com.eradotov.homework.ui.home.userReminders
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -18,11 +22,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.eradotov.homework.Graph.reminderRepository
 import com.eradotov.homework.R
 import com.eradotov.homework.data.entity.Reminder
+import com.eradotov.homework.ui.home.HomeViewModel
 import com.eradotov.homework.util.viewModelProviderFactoryOf
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,8 +33,12 @@ import java.util.*
 fun UserReminders(
     activeUserUsername: String,
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    homeViewModel: HomeViewModel,
 ) {
+    /*
+     * for access to the UserReminderViewModel where is reminders being get from db
+     */
     val viewModel: UserRemindersViewModel = viewModel(
         key = "user_reminder_$activeUserUsername",
         factory = viewModelProviderFactoryOf { UserRemindersViewModel(activeUserUsername) }
@@ -44,6 +51,7 @@ fun UserReminders(
         ListOfReminders(
             list = viewState.reminders,
             navController = navController,
+            homeViewModel = homeViewModel,
         )
     }
 }
@@ -51,10 +59,15 @@ fun UserReminders(
 @Composable
 fun ListOfReminders(
     list: List<Reminder>,
-    navController: NavController
+    navController: NavController,
+    homeViewModel: HomeViewModel,
 ){
-    val inputDialogState = remember{ mutableStateOf(false)}
-    var context = LocalContext.current
+
+    /*
+     * for the regulation of consistency of button view all and displayed reminders
+     */
+    val reminderOccurrencesState by homeViewModel.state.collectAsState()
+
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
         verticalArrangement = Arrangement.Center
@@ -63,6 +76,7 @@ fun ListOfReminders(
             RemindersListItem(
                 reminder = item,
                 onClick = {
+                    reminderOccurrencesState.occurState = true
                     navController.navigate(route = "editReminder/${item.rId}")
                 },
                 modifier = Modifier.fillParentMaxWidth()
@@ -77,10 +91,8 @@ private fun RemindersListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ){
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
     ConstraintLayout(modifier = modifier.clickable { onClick() }) {
-        val (divider, rMessage, /*rContent,*/ icon, rTime,rCreationTime) = createRefs()
+        val (divider, rMessage, icon, rTime,rCreationTime) = createRefs()
         Divider(
             Modifier.constrainAs(divider) {
                 top.linkTo(parent.top)
@@ -91,8 +103,8 @@ private fun RemindersListItem(
         //rCreationTime
         Text(
             text = when {
-                reminder.rCreationTime == null -> { "Created on: ${reminder.rCreationTime.formatToString()}" }
-                else -> "Created on: ${Date().formatToString()}"
+                reminder.rCreationTime != null -> { "Modified on: ${reminder.rCreationTime.toDateString()}" }
+                else -> "Modified on: ${Date().formatToString()}"
             },
             maxLines = 1,
             style = MaterialTheme.typography.caption,
@@ -129,7 +141,7 @@ private fun RemindersListItem(
         )
         //rTime
         Text(
-            text = "Reminder set for: ${reminder.rTime}",
+            text = "Reminder set for: ${reminder.rTime.toDateString()}",
             maxLines = 1,
             style = MaterialTheme.typography.body2,
             modifier = Modifier.constrainAs(rTime) {
@@ -146,31 +158,55 @@ private fun RemindersListItem(
             }
         )
         // icon
-        IconButton(
-            onClick = {
-                Toast.makeText(context, "Deleting...", Toast.LENGTH_SHORT).show()
-                coroutineScope.launch {
-                    reminderRepository.deletingReminder(reminder)
-                }
-                 },
-            modifier = Modifier
-                .size(50.dp)
-                .padding(6.dp)
-                .constrainAs(icon) {
-                    top.linkTo(parent.top, 10.dp)
-                    bottom.linkTo(parent.bottom, 10.dp)
-                    end.linkTo(parent.end)
-                }
-        ) {
+        /*TODO-add color for the schedule icon red/yellow/green(importance)
+              -(which replaces the delete icon)
+        *     -delete is placed on press reminder (in editing part)*/
+        if(reminder.toNotify){
             Icon(
-                imageVector = Icons.Filled.Delete,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(6.dp)
+                    .constrainAs(icon) {
+                        top.linkTo(parent.top, 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                        end.linkTo(parent.end)
+                    },
+                imageVector = Icons.Filled.NotificationsActive,
+                contentDescription = stringResource(R.string.reminder_icon),
+                tint = MaterialTheme.colors.primary
+            )
+        } else {
+            Icon(
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(6.dp)
+                    .constrainAs(icon) {
+                        top.linkTo(parent.top, 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                        end.linkTo(parent.end)
+                    },
+                imageVector = Icons.Outlined.NotificationsNone,
                 contentDescription = stringResource(R.string.reminder_icon),
                 tint = MaterialTheme.colors.primary
             )
         }
+
     }
 }
 
-private fun Date.formatToString(): String {
-    return SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(this)
+/*
+ * formatting methods
+ */
+fun Date.formatToString(): String {
+    return SimpleDateFormat("dd MMMM, yyyy", Locale.getDefault()).format(this)
+}
+
+fun Long.toDateString(): String {
+    return SimpleDateFormat("dd MMMM, yyyy", Locale.getDefault()).format(Date(this))
+}
+
+fun fromStringDateToLong(stringDate: String): Long {
+    val formatter = SimpleDateFormat("dd-MM-yyyy")
+    val date = formatter.parse(stringDate)
+    return date.time
 }
