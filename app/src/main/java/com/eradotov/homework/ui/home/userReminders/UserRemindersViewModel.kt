@@ -3,6 +3,7 @@ package com.eradotov.homework.ui.home.userReminders
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
+import androidx.compose.runtime.collectAsState
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
@@ -15,6 +16,8 @@ import com.eradotov.homework.data.entity.User
 import com.eradotov.homework.data.repository.ReminderRepository
 import com.eradotov.homework.data.repository.UserRepository
 import com.eradotov.homework.ui.MainActivity
+import com.eradotov.homework.ui.home.HomeViewModel
+import com.eradotov.homework.ui.home.ReminderOccurrencesState
 import com.eradotov.homework.util.NotificationWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

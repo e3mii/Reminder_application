@@ -60,6 +60,7 @@ fun HomeContent(
      */
     val reminderOccurrencesState by homeViewModel.state.collectAsState()
     val onlyOccurred = rememberSaveable{ mutableStateOf( true ) }
+
     val coroutineScope = rememberCoroutineScope()
     var user: User? = null
     coroutineScope.launch {
@@ -176,3 +177,5 @@ private fun HomeAppBar(
         }
     )
 }
+
+

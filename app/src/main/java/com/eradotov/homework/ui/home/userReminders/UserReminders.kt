@@ -76,6 +76,7 @@ fun ListOfReminders(
             RemindersListItem(
                 reminder = item,
                 onClick = {
+                    /*TODO - connected to useless db update*/
                     reminderOccurrencesState.occurState = true
                     navController.navigate(route = "editReminder/${item.rId}")
                 },

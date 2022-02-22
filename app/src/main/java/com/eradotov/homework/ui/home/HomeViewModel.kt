@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit
 
 class HomeViewModel(
 ) : ViewModel() {
+
     private val _state = MutableStateFlow(ReminderOccurrencesState())
     val state: StateFlow<ReminderOccurrencesState>
         get() = _state

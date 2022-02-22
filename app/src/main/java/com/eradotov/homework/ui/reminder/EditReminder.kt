@@ -1,6 +1,7 @@
 package com.eradotov.homework.ui.reminder
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eradotov.homework.Graph
 import com.eradotov.homework.data.entity.Reminder
 import com.eradotov.homework.data.repository.ReminderRepository
+import com.eradotov.homework.ui.home.HomeViewModel
 import com.eradotov.homework.ui.home.userReminders.toDateString
 import com.eradotov.homework.util.viewModelProviderFactoryOf
 import com.google.accompanist.insets.systemBarsPadding
@@ -74,7 +76,25 @@ fun EditReminder(
                 backgroundColor = MaterialTheme.colors.secondary.copy(alpha = 0.87f),
             ){
                 IconButton(
-                    onClick = onBackPress
+                    onClick = {
+                        /*TODO - this is just temporary solution, because I could not update
+                        *        the "view" button after only "onBackPress" so I "update"
+                        *        db with same data so that screen could refresh it self
+                        *        (I tried so many things...)*/
+                        val reminder = Reminder(
+                            rId = selectedReminder!!.rId,
+                            rUserId = selectedReminder?.rUserId!!.toLong(),
+                            rMessage = selectedReminder.rMessage,
+                            rTime = selectedReminder.rTime,
+                            rCreationTime = selectedReminder.rCreationTime,
+                            rSeen = selectedReminder.rSeen,
+                            toNotify = selectedReminder.toNotify
+                        )
+                        GlobalScope.launch {
+                            reminderRepository.updateReminder(reminder)
+                        }
+                        onBackPress()
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
