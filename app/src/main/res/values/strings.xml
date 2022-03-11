@@ -4,4 +4,6 @@
     <string name="logout">Logout</string>
     <string name="edit">Edit</string>
     <string name="reminder_icon">ReminderIcon</string>
+    <string name="map">Map</string>
+    <string name="pin">Pin</string>
 </resources>

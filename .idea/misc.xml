@@ -3,10 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/custom_marker_map.xml" value="0.1345" />
         <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_baseline_new_releases_24.xml" value="0.1345" />
+        <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_baseline_work_off_24.xml" value="0.1495" />
         <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1655" />
+        <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_round_directions_walk_24.xml" value="0.1345" />
         <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_round_notifications_active_24.xml" value="0.1345" />
         <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/drawable/ic_round_notifications_none_24.xml" value="0.1345" />
+        <entry key="..\:/Users/erado/Desktop/HomeWork/app/src/main/res/layout/map.xml" value="0.3140625" />
       </map>
     </option>
   </component>

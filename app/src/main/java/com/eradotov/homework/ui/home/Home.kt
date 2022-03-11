@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -123,7 +124,8 @@ fun HomeContent(
 
             HomeAppBar(
                 backgroundColor = appBarColor,
-                navController = navController
+                navController = navController,
+                user = user
             )
 
             UserReminders(
@@ -139,7 +141,8 @@ fun HomeContent(
 @Composable
 private fun HomeAppBar(
     backgroundColor: Color,
-    navController: NavController
+    navController: NavController,
+    user: User?
 ) {
     TopAppBar(
         title = {
@@ -153,6 +156,16 @@ private fun HomeAppBar(
         },
         backgroundColor = backgroundColor,
         actions = {
+            IconButton( onClick = {
+                /*TODO - change id with username, because if quick press on map id is not yet found*/
+                navController.navigate(route = "searchMap/${user?.userId}")
+            } ) {
+                Icon(
+                    imageVector = Icons.Filled.Map,
+                    contentDescription = stringResource(R.string.map),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
             IconButton( onClick = { navController.navigate("profile") } ) {
                 Icon(
                     imageVector = Icons.Filled.AccountCircle,

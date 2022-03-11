@@ -1,23 +1,31 @@
 package com.eradotov.homework.ui.reminder
 
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Pin
+import androidx.compose.material.icons.filled.Room
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.eradotov.homework.Graph
+import com.eradotov.homework.R
 import com.eradotov.homework.data.repository.ReminderRepository
 import com.eradotov.homework.data.entity.Reminder
 import com.google.accompanist.insets.systemBarsPadding
 import kotlinx.coroutines.launch
 import com.eradotov.homework.util.viewModelProviderFactoryOf
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.GlobalScope
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,7 +37,8 @@ import java.util.*
 fun Reminder(
     userId: Long,
     onBackPress: () -> Unit,
-    reminderViewModel: ReminderViewModel = viewModel()
+    reminderViewModel: ReminderViewModel = viewModel(),
+    navController: NavController
 ){
     var context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -50,6 +59,12 @@ fun Reminder(
     val rCreationTime = rememberSaveable { mutableStateOf("") }
     val reminderSeen = rememberSaveable { mutableStateOf("") }
     val checkedState = rememberSaveable { mutableStateOf(true) }
+
+    val latlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
 
     Surface{
         Column(
@@ -89,13 +104,44 @@ fun Reminder(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = "Location of reminder...",
-                    enabled = false,
-                    onValueChange = {},
-                    label = { Text(text = "Description")},
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    if(latlng == null){
+                        OutlinedTextField(
+                            value = "Location of reminder has not been set...",
+                            enabled = false,
+                            onValueChange = {}
+                        )
+                    } else {
+                        OutlinedTextField(
+                            value = "${latlng.latitude}, ${latlng.longitude}",
+                            enabled = false,
+                            onValueChange = {},
+                            label = { Text(text = "Where you need to be") }
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    OutlinedButton(
+                        onClick = {
+                            if(latlng == null){
+                                navController.navigate("map/,")
+                            } else {
+                                navController.navigate("map/${latlng.latitude},${latlng.longitude}")
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(45.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Map,
+                            contentDescription = stringResource(R.string.map),
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedButton(
                     onClick = {
@@ -120,18 +166,24 @@ fun Reminder(
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        val reminder = Reminder(
-                            rUserId = userId,
-                            rMessage = rMessage.value,
-                            rTime = fromStringDateToLong(gadgetsViewState.date),
-                            rCreationTime = Date().time,
-                            rSeen = false,
-                            toNotify = checkedState.value
-                        )
-                        coroutineScope.launch {
-                            reminderViewModel.saveReminder(reminder)
+                        if(rMessage.value == "" || gadgetsViewState.date == "" || latlng?.latitude == null){
+                            Toast.makeText(Graph.appContext,"Wrong entry of reminder...", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val reminder = Reminder(
+                                rUserId = userId,
+                                rMessage = rMessage.value,
+                                rLocationX = latlng.latitude,
+                                rLocationY = latlng.longitude,
+                                rTime = fromStringDateToLong(gadgetsViewState.date),
+                                rCreationTime = Date().time,
+                                rSeen = false,
+                                toNotify = checkedState.value
+                            )
+                            coroutineScope.launch {
+                                reminderViewModel.saveReminder(reminder)
+                            }
+                            onBackPress()
                         }
-                        onBackPress()
                     },
                     modifier = Modifier
                         .fillMaxWidth()

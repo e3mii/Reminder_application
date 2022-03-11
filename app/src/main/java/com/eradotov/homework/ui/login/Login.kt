@@ -144,7 +144,7 @@ fun Login(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "v2.0"
+                text = "v3.0"
             )
         }
     }

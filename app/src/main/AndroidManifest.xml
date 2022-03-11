@@ -9,6 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HomeWork">
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBgq0jDxXmnn1rjHctSqhEugX04RFF9ilA" />
+
         <activity
             android:name="com.eradotov.homework.ui.MainActivity"
             android:exported="true"
