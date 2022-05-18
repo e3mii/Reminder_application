@@ -1,7 +1,7 @@
 # Reminder_application
 In this repository is located application for setting reminders as a homework for course "Mobile Computing" from the Finnish University of Oulu.
 </br></br>
-### Application have the following features:</br>
+## Features:</br>
 -Registration</br>
 -Login</br>
 -Profile</br>
