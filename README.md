@@ -8,4 +8,4 @@ In this repository is located application for setting reminders as a homework fo
 -Reminders manipulation page (adding/editing/removing)<br/>
 -Local reminders<br/>
 -Local database<br/>
--Google map integration and manipulation for the visualsation and interaction with the reminders<br/>
+-Google map integration and manipulation for the visualisation and interaction with the reminders<br/>
